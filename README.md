@@ -10,6 +10,39 @@ Software distributed under the terms of the GNU General Public License as publis
 ## Usage 
 
 ```
- bagse  -d input_data -annot gene_set_annotation [--load_bf | --load_zval] [-lfdr lfdr_output_file]
+ bagse  -d input_data -annot gene_set_annotation [--load_zval] [-lfdr lfdr_output_file]
 ```
+
+## Input data format
+
+### Summary statistics input
+
+The summary statistics input contains individual gene association evidence. BAGSE prefers using estimated association effect size (b-hat) and its corresponding standard error (sde) for each gene. The information should be organized in a single text file with the following format
+
+``` 
+gene-name  b-hat sde 
+```
+
+BAGSE also accepts gene-level z-scores as input. In such case, the expected format for the input text file is
+
+```
+gene-name z-score
+```
+
+
+### Gene set annotation
+
+The gene set annotation should be organized in a text file, which requires the following header
+```
+Gene  pathway-name
+```
+The pathway-name can  be replaced with any actual gene set name. For data input, list each gene in the input data file. Use ``1`` to denote a member gene in the gene set and ``0`` otherwise.
+
+
+### Sample data
+
+A set of sample data can be found in the ``src`` folder.
+
+
+
 
