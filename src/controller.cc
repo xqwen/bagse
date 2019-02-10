@@ -6,26 +6,17 @@
 #include <math.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include <omp.h>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
 #include "logistic.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <algorithm>
 
 void controller::load_data(char *filename){
 
   
 
-  ifstream dfile(filename, ios_base::in | ios_base::binary);
-  boost::iostreams::filtering_istream in;
-
-  in.push(boost::iostreams::gzip_decompressor());
-  in.push(dfile);
-  
- 
+  ifstream dfile(filename);
   string line;
   istringstream ins;
 
@@ -46,13 +37,12 @@ void controller::load_data(char *filename){
   // for grid setting
   double min = 1; 
   double max = 0;; 
-  while(getline(in,line)){
-
+  while(getline(dfile,line)){
     ins.clear();
     ins.str(line);
 
-    if(ins>>snp_id>>loc_id>>beta>>t_val){
-      
+    if(ins>>loc_id>>beta>>t_val){
+      snp_id = loc_id;
       //printf("%s  %f\n", snp_id.c_str(), beta);
       if(curr_loc_id != loc_id){
 	if(curr_loc_id != ""){
@@ -164,217 +154,12 @@ void controller::load_data(char *filename){
 }
 
 
-void controller::load_data_fastqtl(char *filename){
-  
-  // fastQTL file contains dtss info, automatically parse and use dtss in analysis
-  
-  ifstream dfile(filename, ios_base::in | ios_base::binary);
-  boost::iostreams::filtering_istream in;
-
-  in.push(boost::iostreams::gzip_decompressor());
-  in.push(dfile);
-
-
-  string line;
-  istringstream ins;
-
-  string curr_loc_id = "";
-
-  vector<SNP> snp_vec;
-  string loc_id;
-  string snp_id;
-  
-  double bhat;
-  double sdbeta;
-  double pval;
-  double dtss;
-  
-  int index_count = 0;
-  int loc_count = 0;
-
-  map<int, int> bin_hash;
-  
-  double min = 1;
-  double max = 0;
-
-  double median_zcount = 0;
-
-
-  while(getline(in,line)){
-
-    ins.clear();
-    ins.str(line);
-    
-    if(ins>> loc_id >> snp_id >> dtss >>pval >> bhat >> sdbeta){
-      //printf("%s  %f\n", snp_id.c_str(), beta);                                                         
-      if(curr_loc_id != loc_id){
-        if(curr_loc_id != ""){
-
-          if(loc_hash.find(curr_loc_id)== loc_hash.end()){
-            Locus loc(curr_loc_id, snp_vec);
-            int pos = loc_hash.size();
-            loc_hash[curr_loc_id] = pos;
-            locVec.push_back(loc);
-            loc_count++;
-          }else{
-            // already defined, concate the existing snpVec                                              
-            int pos = loc_hash[curr_loc_id];
-            for(int i=0;i<snp_vec.size();i++){
-              locVec[pos].snpVec.push_back(snp_vec[i]);
-            }
-          }
-
-          snp_vec.clear();
-
-        }
-        curr_loc_id = loc_id;
-
-      }
-      
-      //double log10_BF = compute_log10_BF(bhat, sdbeta);
-      SNP snp(snp_id, index_count);
-      if(shrink_pi0>0 && pow(bhat/sdbeta,2)<= 0.4549){
-	      median_zcount++;
-      }
-      if(use_ash){
-      	snp.beta = bhat;
-      	snp.se_beta = sdbeta;
-      	if(sdbeta<min){
-		min = sdbeta;
-      	}		
-      	if(bhat*bhat-sdbeta*sdbeta > max){
-	      max = pow(bhat,2) - pow(sdbeta,2);
-      	}
-      }else{
-      	snp.log10_BF = compute_log10_BF(bhat, sdbeta);
-	snp.grid_size = 1;
-      }	
-      // handling dtss info
-      if(fastqtl_use_dtss){
-	int bin = classify_dist_bin(dtss, 0 , dist_bin_size);
-	if(bin_hash.find(bin)==bin_hash.end()){
-	  bin_hash[bin] = 0;
-	}
-	
-	bin_hash[bin]++;
-	snp.dtss_bin = bin;
-      }
-      
-      index_count++;
-      snp_hash[snp_id] = 100;
-      snp_vec.push_back(snp);
-      
-    }
-  }
-
-  dfile.close();
-
-  // record the last loc
-
-  if(loc_hash.find(curr_loc_id)== loc_hash.end()){
-    Locus loc(curr_loc_id, snp_vec);
-    int pos = loc_hash.size();
-    loc_hash[curr_loc_id] = pos;
-    locVec.push_back(loc);
-    loc_count++;
-  }else{
-    // already defined, concate the existing snpVec                                                       
-    int pos = loc_hash[curr_loc_id];
-    for(int i=0;i<snp_vec.size();i++){
-      locVec[pos].snpVec.push_back(snp_vec[i]);
-    }
-  }
-
- if(use_ash){
- 	// compute BF vector
- 	double phi_min = min/10;
- 	double phi_max = 2*sqrt(max);
- 	if(phi_max<phi_min){
-		 phi_max = 8*phi_min;
- 	}	
-
- 	grid_vec = make_grid(phi_min, phi_max);
- 	grid_size = grid_vec.size();
-  	grid_weight = new double[grid_size];
-  	for(int i=0;i<grid_size;i++){
-    		grid_weight[i] = 1.0/double(grid_size);
-  	}
-  
- 	for(int i=0;i<locVec.size();i++){
-		for(int j=0;j<locVec[i].snpVec.size();j++){
-			 locVec[i].snpVec[j].compute_log10_BF_vec_bhat(grid_vec);
-			 locVec[i].snpVec[j].weightv = grid_weight;
-		}		                    
-		locVec[i].get_BF_matrix();
- 	}
-
- }
-
- p = index_count;
-
- if(shrink_pi0>0){
-	if(set_pi0 > 0){
-           pi0_ubd = set_pi0;
-	}else{
-	   pi0_ubd = 2*median_zcount/p;
-	}
- }	
-
- 
-  
- if(fastqtl_use_dtss){
-    dtss_map[0] =0;
-    dtss_rmap[0] = 0;
-    int count = 1;
-  
-    dist_bin = gsl_vector_int_calloc(p);
-
-    // re-map bin number to skip empty bins
-    for (map<int,int>::iterator it=bin_hash.begin(); it!=bin_hash.end(); ++it){
-      if(it->first==0)
-	continue;
-      dtss_map[it->first] = count;
-      dtss_rmap[count] = it->first;
-      count++;
-    }
-    dist_bin_level = count;
-
-    for (int i=0;i<locVec.size();i++){
-    
-      for(int j=0;j<locVec[i].snpVec.size();j++){
-	string snp_id = locVec[i].snpVec[j].id;
-	gsl_vector_int_set(dist_bin,locVec[i].snpVec[j].index, dtss_map[locVec[i].snpVec[j].dtss_bin]);
-      }
-    }
-  }
-   
-
-  fprintf(stderr, "Read in %d loci, %d locus-SNP pairs ... \n",loc_count, p);
-
-  prior_vec = gsl_vector_calloc(p);
-
-
-
-}
-
-
-  
-
-
-
-
 
 void controller::load_data_zscore(char *filename){
 
   
   
-  ifstream dfile(filename, ios_base::in | ios_base::binary);
-  boost::iostreams::filtering_istream in;
-
-  in.push(boost::iostreams::gzip_decompressor());
-  in.push(dfile);
-  
- 
+  ifstream dfile(filename);
   string line;
   istringstream ins;
 
@@ -388,15 +173,15 @@ void controller::load_data_zscore(char *filename){
   int loc_count = 0;
   double max = 0;
   double median_zcount = 0;
-  while(getline(in,line)){
+  while(getline(dfile,line)){
 
     ins.clear();
     ins.str(line);
 
-    if(ins>>snp_id>>loc_id>>z_val){
+    if(ins>>loc_id>>z_val){
 
       //printf("%s  %f\n", snp_id.c_str(), z_val);
-
+      snp_id = loc_id;
       if(curr_loc_id != loc_id){
 	if(curr_loc_id != ""){
 	  
@@ -510,361 +295,6 @@ void controller::load_data_zscore(char *filename){
 
 
 
-
-// this function directly loads pre-computed log10 Bayes factors
-
-void controller::load_data_BF(char *filename){
-
-  
-
-  ifstream dfile(filename, ios_base::in | ios_base::binary);
-  boost::iostreams::filtering_istream in;
-
-  in.push(boost::iostreams::gzip_decompressor());
-  in.push(dfile);
-  
- 
-  string line;
-  istringstream ins;
-
-  string curr_loc_id = "";
-
-  vector<SNP> snp_vec;
-  string loc_id;
-  string snp_id;
-  double log10_BF;
-  int index_count = 0;
-  int loc_count = 0;
-  while(getline(in,line)){
-
-    ins.clear();
-    ins.str(line);
-
-    if(ins>>snp_id>>loc_id>>log10_BF){
-      
-      //printf("%s  %f\n", snp_id.c_str(), log10_BF);
-
-      if(curr_loc_id != loc_id){
-	if(curr_loc_id != ""){
-	  
-	  if(loc_hash.find(curr_loc_id)== loc_hash.end()){
-	    Locus loc(curr_loc_id, snp_vec);
-	    int pos = loc_hash.size();
-	    loc_hash[curr_loc_id] = pos;
-	    locVec.push_back(loc);	  
-	    loc_count++;
-	  }else{
-	    // already defined, concate the existing snpVec
-	    int pos = loc_hash[curr_loc_id];
-	    for(int i=0;i<snp_vec.size();i++){
-	      locVec[pos].snpVec.push_back(snp_vec[i]);
-	    }	   
-	  }
-	  
-	  snp_vec.clear();
-	
-	}
-	curr_loc_id = loc_id;
-   
-      }
-      
-      SNP snp(snp_id, log10_BF, index_count);
-      index_count++;
-      snp_hash[snp_id] = 100;
-      snp_vec.push_back(snp);
-      
-    }
-  }
-   
-  dfile.close();
-
-  if(loc_hash.find(curr_loc_id)== loc_hash.end()){
-    Locus loc(curr_loc_id, snp_vec);
-    int pos = loc_hash.size();
-    loc_hash[curr_loc_id] = pos;
-    locVec.push_back(loc);
-    loc_count++;
-  }else{
-    // already defined, concate the existing snpVec                                               
-    int pos = loc_hash[curr_loc_id];
-    for(int i=0;i<snp_vec.size();i++){
-      locVec[pos].snpVec.push_back(snp_vec[i]);
-    }
-  }
-  
-  
- 
-  p = index_count;
-
-  fprintf(stderr, "Read in %d loci, %d locus-SNP pairs ... \n",loc_count, p);
-  
-  prior_vec = gsl_vector_calloc(p);
-
-}
-
-
-
-// this function directly loads pre-computed log10 Bayes factors
-
-void controller::load_data_BSLMM_BF(char *filename, int gsize){
-
-
-  ifstream dfile(filename, ios_base::in | ios_base::binary);
-  boost::iostreams::filtering_istream in;
-
-  in.push(boost::iostreams::gzip_decompressor());
-  in.push(dfile);
-  
- 
-  string line;
-  istringstream ins;
-
-  string curr_loc_id = "";
-
-  vector<SNP> snp_vec;
-  vector<double> baseline_vec;
-  string loc_id;
-  string snp_id;
-  double log10_BF;
-  int index_count = 0;
-  int loc_count = 0;
-
-  
-  // initialize grid_weight
-  grid_size = gsize;
-  grid_weight = new double[grid_size];
-  for(int i=0;i<grid_size;i++){
-    grid_weight[i] = 1.0/double(grid_size);
-  }
-  
-  
-  while(getline(in,line)){
-
-    ins.clear();
-    ins.str(line);
-
-    if(ins>>snp_id>>loc_id){
-      
-      //printf("%s  %f\n", snp_id.c_str(), log10_BF);
-
-      if(curr_loc_id != loc_id){
-	if(curr_loc_id != ""){
-	  
-	  if(loc_hash.find(curr_loc_id)== loc_hash.end()){
-	    Locus loc(curr_loc_id, snp_vec);
-	    if(baseline_vec.size()>0){
-	      loc.baseline_vec = baseline_vec;
-	    }
-	    int pos = loc_hash.size();
-	    loc_hash[curr_loc_id] = pos;
-	    locVec.push_back(loc);
-	    locVec[pos].get_BF_matrix();
-	    loc_count++;
-	  }else{
-	    // already defined, concate the existing snpVec
-	    int pos = loc_hash[curr_loc_id];
-	    for(int i=0;i<snp_vec.size();i++){
-	      locVec[pos].snpVec.push_back(snp_vec[i]);
-	    }	   
-	  }
-	  
-	  snp_vec.clear();
-	  baseline_vec.clear();
-	}
-	curr_loc_id = loc_id;
-   
-      }
-
-      vector<double> bf_vec;
-      double bf;
-      for (int i=0;i<grid_size;i++){
-	if(ins >> bf){
-	  bf_vec.push_back(bf);
-	}
-      }
-      if(snp_id == "BASELINE"){
-	baseline_vec = bf_vec;
-      }else{
-	SNP snp(snp_id, bf_vec, index_count, grid_weight);
-	index_count++;
-	snp_hash[snp_id] = 100;
-	snp_vec.push_back(snp);
-      }
-    }
-  }
-   
-  dfile.close();
-
-  if(loc_hash.find(curr_loc_id)== loc_hash.end()){
-    Locus loc(curr_loc_id, snp_vec);
-    if(baseline_vec.size()>0){
-      loc.baseline_vec = baseline_vec;
-    }
-    int pos = loc_hash.size();
-    loc_hash[curr_loc_id] = pos;
-    locVec.push_back(loc);
-    locVec[pos].get_BF_matrix();
-    loc_count++;
-  }else{
-    // already defined, concate the existing snpVec                                               
-    int pos = loc_hash[curr_loc_id];
-    for(int i=0;i<snp_vec.size();i++){
-      locVec[pos].snpVec.push_back(snp_vec[i]);
-    }
-  }
-  
-  
- 
-  p = index_count;
-
-  fprintf(stderr, "Read in %d loci, %d locus-SNP pairs ... \n",loc_count, p);
-  
-  prior_vec = gsl_vector_calloc(p);
-
-  /*
-    for(int i=0;i<locVec.size();i++){
-    for(int j=0;j<locVec[i].snpVec.size();j++){
-      for(int k=0;k<grid_size;k++){
-	printf("%7.2e  ", locVec[i].snpVec[j].log10_BF_vec[k]);
-	printf("%7.2e    ", locVec[i].BF_wv_vec[k][j]);
-      }
-    }
-    printf("\n");
-  }
-  */
-
-  
-
-  
-  
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void controller::load_map(char* gene_file, char *snp_file){
-  
-  if(fastqtl_use_dtss)
-    return;
-  
-  if(strlen(gene_file)==0 || strlen(snp_file)==0){
-    return;
-  }
-
-  
-
-  map<string, int> gene_map;
-  map<string, int> snp_map;
-
-  ifstream gfile(gene_file, ios_base::in | ios_base::binary);
-  boost::iostreams::filtering_istream in;
-
-  in.push(boost::iostreams::gzip_decompressor());
-  in.push(gfile);
-  
-
-  string line;
-  istringstream ins;
-
-  
-  string gene_id;
-  int chr;
-  double tss1;
-  double tss2;
-  while(getline(in,line)){
-
-    ins.clear();
-    ins.str(line);
-
-    if(ins>>gene_id>>chr>>tss1>>tss2){
-      if(loc_hash.find(gene_id) != loc_hash.end()){
-	gene_map[gene_id] = tss1;
-      }
-    }
-  }
-  gfile.close();
-
-  
-  ifstream sfile(snp_file, ios_base::in | ios_base::binary);
-  boost::iostreams::filtering_istream snp_in;
-  
-  snp_in.push(boost::iostreams::gzip_decompressor());
-  snp_in.push(sfile);
-
-  istringstream snp_ins;
-
-
-  string snp_id;
-  double pos;
-  
-  while(getline(snp_in,line)){
-
-    snp_ins.clear();
-    snp_ins.str(line);
-
-    if(snp_ins>>snp_id>>chr>>pos){
-      if(snp_hash.find(snp_id)!=snp_hash.end()){
-	snp_map[snp_id] = pos;
-      }
-    }
-  }
-  sfile.close();
-
-  dist_bin = gsl_vector_int_calloc(p);
-  map<int, int> bin_hash;
- 
-  for (int i=0;i<locVec.size();i++){
-    string loc_id = locVec[i].id;
-    for(int j=0;j<locVec[i].snpVec.size();j++){
-      string snp_id = locVec[i].snpVec[j].id;
-      int bin = classify_dist_bin(snp_map[snp_id], gene_map[loc_id],dist_bin_size);
-      if(bin_hash.find(bin)==bin_hash.end()){
-         bin_hash[bin] = 0;
-      }
-      bin_hash[bin]++;
-      gsl_vector_int_set(dist_bin,locVec[i].snpVec[j].index, bin);
-    }
-  }
-  
-
-  dtss_map[0] =0;
-  dtss_rmap[0] = 0;
-  int count = 1;
-  for (map<int,int>::iterator it=bin_hash.begin(); it!=bin_hash.end(); ++it){
-    //printf("bin %d    %d \n", it->first, it->second);
-    if(it->first==0)
-      continue;
-    dtss_map[it->first] = count;
-    dtss_rmap[count] = it->first;
-    //printf("%d   %f    %d\n",count, map_bin_2_dist(count,dist_bin_size),it->second);
-    count++;
-  }
-  
-  dist_bin_level = count;
-  
-  for(int i=0;i<p;i++){
-    //printf("%d \n", gsl_vector_int_get(dist_bin,i));
-    gsl_vector_int_set(dist_bin, i, dtss_map[gsl_vector_int_get(dist_bin,i)]);
-  }
-  //exit(1);
-  
-}
-
-
-
-
-
 void controller::load_annotation(char* annot_file){
 
  
@@ -881,12 +311,7 @@ void controller::load_annotation(char* annot_file){
  
 
 
-    ifstream afile(annot_file, ios_base::in | ios_base::binary);
-    boost::iostreams::filtering_istream in;
-
-    in.push(boost::iostreams::gzip_decompressor());
-    in.push(afile);
-    
+    ifstream afile(annot_file);
     string line;
     istringstream ins;
 
@@ -898,7 +323,7 @@ void controller::load_annotation(char* annot_file){
     fprintf(stderr, "Loading annotations ... \n");
  
     
-    while(getline(in,line)){
+    while(getline(afile,line)){
       ins.clear();
       ins.str(line);
       
@@ -907,7 +332,7 @@ void controller::load_annotation(char* annot_file){
       while(ins>>token){
 
 	if(col_count==-1){
-	  if(token == "SNP" || token == "snp"){
+	  if(token == "GENE" || token == "Gene" || token == "gene"){
 	    col_count = 0;
 	    continue;
 	  }else{
@@ -946,7 +371,7 @@ void controller::load_annotation(char* annot_file){
     // read in data
    
     
-    while(getline(in,line)){
+    while(getline(afile,line)){
      
       ins.clear();
       ins.str(line);

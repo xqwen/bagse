@@ -7,10 +7,8 @@
 void show_banner(){
 
   fprintf(stderr, "\n\nBAGSE: BAyseian Gene Set Enriment Analysis\n\n");
-  fprintf(stderr, "Usage: bagse  -d input_data -annot gene_set_annotation [--load_bf | --load_zval] [-lfdr lfdr_output_file]\n\n");
+  fprintf(stderr, "Usage:  bagse -d input_data_file -annot gene_set_annotation_file   [--load_zval]   [-lfdr lfdr_output_file]\n\n");
   
-
-
 }
 
 
@@ -159,9 +157,6 @@ int main(int argc, char **argv){
   switch(data_format){
   case 1:
     con.load_data(data_file);
-    break;
-  case 2:
-    con.load_data_BF(data_file);
     break;
   case 3:
     con.load_data_zscore(data_file);
