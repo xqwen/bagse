@@ -21,8 +21,6 @@ int main(int argc, char **argv){
   //phlist.push_back(0.05);
 
   char data_file[256];
-  char gmap_file[256];
-  char smap_file[256];
   char annot_file[256];
   char prior_dir[256];
   char output_pip[256];

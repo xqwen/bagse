@@ -147,7 +147,7 @@ void controller::load_data(char *filename){
 	}
  }	
 
- fprintf(stderr, "Read in %d loci, %d locus-SNP pairs ... \n",loc_count, p);
+ fprintf(stderr, "Read in %d  loci/genes ... \n",loc_count);
   
  prior_vec = gsl_vector_calloc(p);
 
@@ -285,7 +285,7 @@ void controller::load_data_zscore(char *filename){
 
 
 
-  fprintf(stderr, "Read in %d loci, %d locus-SNP pairs ... \n", loc_count, p);
+  fprintf(stderr, "Read in %d loci/genes ... \n", loc_count);
   
   prior_vec = gsl_vector_calloc(p);
   
@@ -320,7 +320,7 @@ void controller::load_annotation(char* annot_file){
     int count_d=0;
     int count_c=0;
     
-    fprintf(stderr, "Loading annotations ... \n");
+    fprintf(stderr, "Load annotations ... \n");
  
     
     while(getline(afile,line)){
@@ -342,17 +342,17 @@ void controller::load_annotation(char* annot_file){
 	
 	string cat = token.substr(token.size()-2, 2);
 	// continuous
-	if(cat == "_c" || cat =="_C"){
+	if(cat == "_ccc" || cat =="_CCC"){
 	  col2cat[col_count] = 1;
 	  col2cpos[col_count] = kc;
 	  string name = token.substr(0,token.size()-2);
 	  cvar_name_vec.push_back(name);
 	  kc++;
-	} // discrete/categorical
+	} // by default, discrete/categorical
 	else{
 	  col2cat[col_count] = 2;
 	  col2dpos[col_count] = kd;
-	  string name = token.substr(0,token.size()-2);
+	  string name = token;
 	  dvar_name_vec.push_back(name);
 	  kd++;
 	  
