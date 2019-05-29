@@ -1,12 +1,10 @@
-main: main.o controller.o logistic.o 
-	g++  -O3 main.o controller.o logistic.o  -lm -lgsl -lgslcblas  -o bagse  
-static: main.o controller.o logistic.o
-	g++  -O3 main.o controller.o logistic.o  -lm -lgsl -lgslcblas -static -o bagse.static
-main.o: main.cc 
-	g++ -c  main.cc	
-controller.o: controller.cc classdef.h
-	g++    -c  controller.cc 
-logistic.o: logistic.cc logistic.h
-	g++ -c logistic.cc -fpermissive
+main: bagse_main.o bagse.o GenEM_mixture.o 
+	g++  -O3 bagse_main.o bagse.o GenEM_mixture.o  -lm -o bagse  
+bagse_main.o: bagse_main.cc 
+	g++ -c  bagse_main.cc
+bagse.o: bagse.cc bagse.h
+	g++    -c  bagse.cc 
+GenEM.o: GenEM_mixture.cc GenEM_mixture.h
+	g++ -c GenEM_mixture.cc 
 clean:
 	rm *.o bagse	
