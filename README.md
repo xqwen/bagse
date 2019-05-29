@@ -2,6 +2,7 @@
 
 This repository contains the software package BAGSE designed for gene set enrichment analysis. BAGSE performs both enrichment (hypothesis) testing and quantification. It requires gene-level association evidence (in forms of either z-scores or estimated effect sizes with corresponding standard errors) and pre-defined gene set annotations as input.
 
+The current release is version 1.1.
 
 ## License
 
@@ -10,38 +11,48 @@ Software distributed under the terms of the GNU General Public License as publis
 ## Usage 
 
 ```
- bagse  -d input_data -annot gene_set_annotation [--load_zval] [-lfdr lfdr_output_file]
+ bagse  -d input_data [--load_zval] [-fdr_level alpha]  [-fdr_out fdr_output_file]
 ```
 
 ## Input data format
 
-### Summary statistics input
+### Mutually exclusive gene set annotation
 
-The summary statistics input contains individual gene association evidence. BAGSE prefers using estimated association effect size (b-hat) and its corresponding standard error (sde) for each gene. The information should be organized in a single text file with the following format
+This specific input format should be used if every gene is annotated by one of K mutually exclusive categories. The summary statistics and annotation of the genes should be contained in a single text file. 
+Importantly, we require that **the annotation for the baseline category is coded by ``0"**, other categories can be coded by arbitrary strings or integers.
+
+
+BAGSE prefers estimated association effect size (b-hat) and its corresponding standard error (sde) as the summary statistics for each gene. The information should be organized in a single text file with the following format
 
 ``` 
-gene-name  b-hat sde 
+gene-name  b-hat sde  annotation
 ```
 
 BAGSE also accepts gene-level z-scores as input. In such case, the expected format for the input text file is
 
 ```
-gene-name z-score
+gene-name z-score annotation
+```
+Use command option ``--load_zval`` to inform BAGSE that the z-score input is used. 
+
+
+#### Sample data
+
+A set of sample data (``sample.bagse.dat```) can be found in the ``src`` folder. To estimate the enrichment parameter run
+
+```
+bagse -d sample.bagse.dat --load_zval 
 ```
 
 
-### Gene set annotation
-
-The gene set annotation should be organized in a text file, which requires the following header
-```
-Gene  pathway-name
-```
-The pathway-name can  be replaced with any actual gene set name. For data input, list each gene in the input data file. Use ``1`` to denote a member gene in the gene set and ``0`` otherwise.
 
 
-### Sample data
 
-A set of sample data can be found in the ``src`` folder.
+## Output format
+
+### Enrichment estimates
+
+### FDR control results
 
 
 
