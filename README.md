@@ -38,7 +38,7 @@ Use command option ``--load_zval`` to inform BAGSE that the z-score input is use
 
 #### Sample data
 
-A set of sample data (``sample.bagse.dat```) can be found in the ``src`` folder. To estimate the enrichment parameter run
+A set of sample data (``sample.bagse.dat``) can be found in the ``src`` folder. To estimate the enrichment parameter run
 
 ```
 bagse -d sample.bagse.dat --load_zval 
