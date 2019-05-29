@@ -50,6 +50,7 @@ void BAGSE::load_data(char *filename, int use_zval){
             fprintf(stderr, "\nError: unexpected data format in input\n\n");
             exit(1);
         };
+        loc_vec.push_back(loc_id);
         beta_vec.push_back(beta);
         se_vec.push_back(se_beta);
 
@@ -220,6 +221,49 @@ vector<double> BAGSE::find_CI(vector<double> & est_vec, int cat, double value, d
     return rstv;
 
 }
+
+
+void BAGSE::fdr_control(char *fdr_out, double fdr_level){
+
+    vector<vector<double> > P_matrix = gem.get_P_matrix();
+    vector<double> lfdr_vec;
+    for(int i=0;i<N;i++){
+        int index = annot_vec[i]*(grid_size+1);
+        lfdr_vec.push_back(P_matrix[i][index]);
+    }
+    vector<double> lfdr_sort_vec = lfdr_vec;
+    std::sort(lfdr_sort_vec.begin(), lfdr_sort_vec.end());
+    double cutoff = 0;
+    double sum = 0;
+    for(int i=0;i<N;i++){
+        sum += lfdr_sort_vec[i];
+        if(sum/(i+1) > fdr_level){
+            fprintf(stderr, "\n\n   FDR control: %d genes rejected at level %.2f\n\n", i, fdr_level);
+            break;
+        }
+        cutoff = lfdr_sort_vec[i];
+    }
+
+    FILE *fout;
+    if(strlen(fdr_out) == 0){
+        fout = fopen("fdr.out", "w");
+    }else
+        fout = fopen(fdr_out,"w");
+
+    for(int i=0;i<N;i++){
+        int rej = 0;
+        if(lfdr_vec[i]<=cutoff){
+            rej = 1;
+        }
+        fprintf(fout, "%15s  %10s   %7.3e   %d\n", loc_vec[i].c_str(), category_rmap[annot_vec[i]].c_str(),  lfdr_vec[i], rej);
+    }
+
+    fclose(fout);
+        
+
+}
+
+
 
 
 

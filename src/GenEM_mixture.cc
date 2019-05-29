@@ -90,7 +90,6 @@ double GenEM_mixture::EM_run(vector<vector<double> >& log10_BF_in, vector<double
 
 
 
-
 double log10_weighted_sum(vector<double> &vec, vector<double> &wts){
 
 

@@ -26,8 +26,8 @@ int main(int argc, char **argv){
     int nthread = 1;
     int use_zval = 0;
     double EM_thresh = 0.1;
-
-
+    double fdr_level = 0;
+    
     memset(data_file,0,256);
     memset(output_fdr,0, 256);
 
@@ -57,6 +57,17 @@ int main(int argc, char **argv){
         }
 
 
+        if(strcmp(argv[i], "-fdr_level")==0){
+            fdr_level = atof(argv[++i]);
+            continue;
+        }
+
+        if(strcmp(argv[i], "--fdr")==0){
+            if(fdr_level==0)
+                fdr_level = 0.05;
+            continue;
+        }
+
 
         if(strcmp(argv[i], "-h")==0 || strcmp(argv[i], "-help")==0 ){
             show_banner();
@@ -85,6 +96,8 @@ int main(int argc, char **argv){
     bagse.load_data(data_file, use_zval);
     bagse.run(EM_thresh);
 
+    if(fdr_level > 0 && fdr_level<=1)
+        bagse.fdr_control(output_fdr, fdr_level);
 
 }
 

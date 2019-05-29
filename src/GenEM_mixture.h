@@ -23,13 +23,15 @@ class GenEM_mixture{
 
 
     public:
-        
-       double EM_run(vector<vector<double> >& BF_in, vector<double> & init_wts, double thresh);
+
+        double EM_run(vector<vector<double> >& BF_in, vector<double> & init_wts, double thresh);
         vector<double> get_estimate(){
             return wts_matrix;
         }
         double compute_loglik(vector<double> & input_wts);
-
+        vector<vector<double> > get_P_matrix(){
+            return P_matrix;
+        }
 
 };
 

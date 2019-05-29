@@ -17,6 +17,7 @@ class BAGSE {
         map<int, string> category_rmap;
         vector<int> annot_vec;
         vector<vector<double> > log10_BF_matrix;
+        vector<string> loc_vec;
 
         GenEM_mixture gem;
         double final_loglik;
@@ -29,4 +30,5 @@ class BAGSE {
     public:
         void run(double thresh);
         void load_data(char *filename, int use_zval);
+        void fdr_control(char *fdr_out, double fdr_level);
 };
