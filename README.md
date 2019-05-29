@@ -19,7 +19,7 @@ Software distributed under the terms of the GNU General Public License as publis
 ### Mutually exclusive gene set annotation
 
 This specific input format should be used if every gene is annotated by one of K mutually exclusive categories. The summary statistics and annotation of the genes should be contained in a single text file. 
-Importantly, we require that **the annotation for the baseline category is coded by ``0"**, other categories can be coded by arbitrary strings or integers.
+Importantly, we require that **the annotation for the baseline category is coded by 0**, other categories can be coded by arbitrary strings or integers.
 
 
 BAGSE prefers estimated association effect size (b-hat) and its corresponding standard error (sde) as the summary statistics for each gene. The information should be organized in a single text file with the following format
