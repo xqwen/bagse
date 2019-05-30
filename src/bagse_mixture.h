@@ -3,7 +3,7 @@ using namespace std;
 #include <map>
 #include "GenEM_mixture.h"
 
-class BAGSE {
+class BAGSE_mixture {
 
     private:
         int N;  // unit number

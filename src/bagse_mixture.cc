@@ -6,11 +6,11 @@ using namespace std;
 #include <string.h>
 #include <math.h>
 #include <algorithm>
-#include "bagse.h"
+#include "bagse_mixture.h"
 
 #define NINF -999999
 
-void BAGSE::load_data(char *filename, int use_zval){
+void BAGSE_mixture::load_data(char *filename, int use_zval){
 
 
 
@@ -126,7 +126,7 @@ void BAGSE::load_data(char *filename, int use_zval){
 }
 
 
-vector<double> BAGSE::make_grid(double phi_min, double phi_max){
+vector<double> BAGSE_mixture::make_grid(double phi_min, double phi_max){
 
     vector<double> gvec;
     gvec.push_back(phi_max); //phi_max
@@ -143,7 +143,7 @@ vector<double> BAGSE::make_grid(double phi_min, double phi_max){
 
 
 
-void BAGSE::run(double thresh){  
+void BAGSE_mixture::run(double thresh){  
 
     // initial setting
     vector<double> wts_vec(K, (1.0/N)/(grid_size*annot_size) );
@@ -193,7 +193,7 @@ void BAGSE::run(double thresh){
 
 
 
-vector<double> BAGSE::find_CI(vector<double> & est_vec, int cat, double value, double contrast){
+vector<double> BAGSE_mixture::find_CI(vector<double> & est_vec, int cat, double value, double contrast){
 
     double total_wts = 0;
 
@@ -223,7 +223,7 @@ vector<double> BAGSE::find_CI(vector<double> & est_vec, int cat, double value, d
 }
 
 
-void BAGSE::fdr_control(char *fdr_out, double fdr_level){
+void BAGSE_mixture::fdr_control(char *fdr_out, double fdr_level){
 
     vector<vector<double> > P_matrix = gem.get_P_matrix();
     vector<double> lfdr_vec;
@@ -267,7 +267,7 @@ void BAGSE::fdr_control(char *fdr_out, double fdr_level){
 
 
 
-double BAGSE::compute_log10_BF(double beta, double se_beta, double phi){
+double BAGSE_mixture::compute_log10_BF(double beta, double se_beta, double phi){
 
     if(se_beta == 0)
         return 0;

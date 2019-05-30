@@ -1,26 +1,17 @@
-#include <vector>
+#include "GenEM.h"
 
-
-
-class GenEM_mixture{
+class GenEM_mixture : public GenEM {
 
     private:
 
         int K; // number of parameters
-        int N; // number of units
 
         vector<double> wts_matrix; //  (Kx1)
-        vector<vector<double> > log10_BF_matrix;  //  (NxK)
         vector<double> BF_avg;     //  (Nx1)
         vector<vector<double> > P_matrix;   //  (NxK) 
 
-        void E_step(); // compute BF_avg and P_matrix
-        void M_step(); // compute P_matrix and update wts_matrix
-
         void EM_init(vector<vector<double> >& BF_in, vector<double> & init_wts);
-        double EM_update();    
-
-
+        double EM_update();
 
     public:
 
@@ -36,4 +27,3 @@ class GenEM_mixture{
 };
 
 
-double log10_weighted_sum(vector<double> &vec, vector<double> &wts);

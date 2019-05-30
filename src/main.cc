@@ -3,7 +3,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "bagse.h"
+#include "bagse_mixture.h"
+#include "bagse_logistic.h"
 
 void show_banner(){
 
@@ -23,6 +24,7 @@ int main(int argc, char **argv){
 
     char data_file[256];
     char output_fdr[256];
+    char annot_file[256];
     int nthread = 1;
     int use_zval = 0;
     double EM_thresh = 0.1;
@@ -30,7 +32,7 @@ int main(int argc, char **argv){
     
     memset(data_file,0,256);
     memset(output_fdr,0, 256);
-
+    memset(annot_file,0,256);
 
     for(int i=1;i<argc;i++){
 
@@ -38,6 +40,13 @@ int main(int argc, char **argv){
             strcpy(data_file,argv[++i]);
             continue;
         }
+
+
+        if(strcmp(argv[i], "-annot")==0 || strcmp(argv[i], "-a") == 0){
+            strcpy(annot_file, argv[++i]);
+            continue;
+        }
+
 
 
         if(strcmp(argv[i], "-t")==0 || strcmp(argv[i], "-thresh")==0){
@@ -90,15 +99,28 @@ int main(int argc, char **argv){
         exit(0);
     }
 
+    
+    if(strlen(annot_file) == 0){
+        // a global variable 
+        BAGSE_mixture bagse_m;
+        bagse_m.load_data(data_file, use_zval);
+        bagse_m.run(EM_thresh);
+    
 
-    // a global variable 
-    BAGSE bagse;
-    bagse.load_data(data_file, use_zval);
-    bagse.run(EM_thresh);
+        if(fdr_level > 0 && fdr_level<=1)
+            bagse_m.fdr_control(output_fdr, fdr_level);
+    
+    }else{
+        BAGSE_logistic bagse_l;
+        bagse_l.load_data(data_file, use_zval, annot_file);
+        bagse_l.run(EM_thresh);
 
-    if(fdr_level > 0 && fdr_level<=1)
-        bagse.fdr_control(output_fdr, fdr_level);
+
+        if(fdr_level > 0 && fdr_level<=1)
+            bagse_l.fdr_control(output_fdr, fdr_level);
+    }
+
+
+
 
 }
-
-
