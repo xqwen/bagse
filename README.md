@@ -62,7 +62,7 @@ The presence of the annotation file ``annot_dat`` notifies BAGSE to switch to th
 A set of sample data (``sample.dat`` and ``sample.annot.dat``) can be found in the ``src`` folder. To estimate the enrichment parameter run
 
 ```
-bagse -d sample.dat -a annot_data --load_zval
+bagse -d sample.dat -a  sample.annot.dat  --load_zval
 ```
 
 
