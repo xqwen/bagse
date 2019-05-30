@@ -54,7 +54,7 @@ bagse -d sample.bagse.dat --load_zval
  bagse  -d summary_data -a annot_dat [--load_zval] [-fdr_level alpha]  [-fdr_out fdr_output_file]
 ```
 
-The presence of the annotation file ``annot_dat`` notifies BAGSE to switch to the algorithm using additive prior 
+The presence of the annotation file ``annot_dat`` notifies BAGSE to switch to the algorithm using the additive prior. 
 
 
 #### 2.2 Sample data
