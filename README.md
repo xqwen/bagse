@@ -8,15 +8,9 @@ The current release is version 1.1.
 
 Software distributed under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](http://www.gnu.org/licenses/gpl-3.0.en.html) for more details.
 
-## Usage 
+## Type of gene set annotation
 
-```
- bagse  -d input_data [--load_zval] [-fdr_level alpha]  [-fdr_out fdr_output_file]
-```
-
-## Input data format
-
-### Mutually exclusive gene set annotation
+### 1. Single mutually exclusive gene set annotation
 
 This specific input format should be used if every gene is annotated by one of K mutually exclusive categories. The summary statistics and annotation of the genes should be contained in a single text file. 
 Importantly, we require that **the annotation for the baseline category is coded by 0**, other categories can be coded by arbitrary strings or integers.
@@ -36,7 +30,14 @@ gene-name z-score annotation
 Use command option ``--load_zval`` to inform BAGSE that the z-score input is used. 
 
 
-#### Sample data
+#### 1.1  Usage 
+
+```
+ bagse  -d input_data [--load_zval] [-fdr_level alpha]  [-fdr_out fdr_output_file]
+```
+
+
+#### 1.2 Sample data
 
 A set of sample data (``sample.bagse.dat``) can be found in the ``src`` folder. To estimate the enrichment parameter run
 
@@ -45,10 +46,29 @@ bagse -d sample.bagse.dat --load_zval
 ```
 
 
+### 2.Multiple gene set annotations assuming additivity
+
+#### 2.1  Usage
+
+```
+ bagse  -d summary_data -a annot_dat [--load_zval] [-fdr_level alpha]  [-fdr_out fdr_output_file]
+```
+
+The presence of the annotation file ``annot_dat`` notifies BAGSE to switch to the algorithm using additive prior 
+
+
+#### 2.2 Sample data
+
+A set of sample data (``sample.dat`` and ``sample.annot.dat``) can be found in the ``src`` folder. To estimate the enrichment parameter run
+
+```
+bagse -d sample.dat -a annot_data --load_zval
+```
 
 
 
-## Output format
+
+## Output 
 
 ### Enrichment estimates
 
