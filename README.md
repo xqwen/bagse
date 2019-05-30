@@ -8,7 +8,9 @@ The current release is version 1.1.
 
 Software distributed under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](http://www.gnu.org/licenses/gpl-3.0.en.html) for more details.
 
-## Type of gene set annotation
+## Types of gene set annotation
+
+When multiple gene set annotations are available, there are two possible ways to formulate gene set enrichment analysis. 
 
 ### 1. Single mutually exclusive gene set annotation
 
