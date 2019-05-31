@@ -53,7 +53,7 @@ Additionally, p-values can be used in place of z-scores when the command line op
 #### 1.1  Usage 
 
 ```
- bagse  -d input_data [--load_zval] [-fdr_level alpha]  [-fdr_out fdr_output_file]
+ bagse  -d input_data [--load_zval | --load_pval ] [-fdr_level alpha]  [-fdr_out fdr_output_file]
 ```
 
 
@@ -109,7 +109,7 @@ Gene    set1-name set2-name set3-name ...
 #### 2.1  Usage
 
 ```
- bagse  -d summary_data -a annot_dat [--load_zval] [-fdr_level alpha]  [-fdr_out fdr_output_file]
+ bagse  -d summary_data -a annot_dat [--load_zval|--load_pval] [-fdr_level alpha]  [-fdr_out fdr_output_file]
 ```
 
 **The presence of the annotation file** ``annot_dat`` **and the**``-a`` **flag notify  BAGSE to switch to the algorithm using the additive prior.** 
