@@ -7,6 +7,7 @@ using namespace std;
 #include <math.h>
 #include <algorithm>
 #include "bagse_mixture.h"
+#include <gsl/gsl_cdf.h>
 
 #define NINF -999999
 
@@ -43,8 +44,11 @@ void BAGSE_mixture::load_data(char *filename, int use_zval){
         
         if(!use_zval)
             ins>>se_beta;
-        else
+        else 
             se_beta = 1;
+
+        if(use_zval == -1) // pvalue is used
+            beta = gsl_cdf_ugaussian_Qinv (beta/2);
         
         if(!(ins>>annot)){
             fprintf(stderr, "\nError: unexpected data format in input\n\n");

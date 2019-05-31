@@ -60,6 +60,11 @@ int main(int argc, char **argv){
             continue;
         }
 
+        if(strcmp(argv[i], "--load_pval")==0 || strcmp(argv[i], "--pval")==0){
+            use_zval = -1;
+            continue;
+        }
+
         if(strcmp(argv[i], "-fdr_out")==0){
             strcpy(output_fdr, argv[++i]);
             continue;

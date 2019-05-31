@@ -6,6 +6,7 @@ using namespace std;
 #include <string.h>
 #include <math.h>
 #include <algorithm>
+#include <gsl/gsl_cdf.h>
 #include "bagse_logistic.h"
 
 
@@ -43,6 +44,10 @@ void BAGSE_logistic::load_data(char *filename, int use_zval, char *annot_file){
             ins>>se_beta;
         else
             se_beta = 1;
+
+        if(use_zval == -1){
+            beta = gsl_cdf_ugaussian_Qinv (beta/2);
+        }
 
         loc_vec.push_back(loc_id);
         gene_hash[loc_id] = 100;
