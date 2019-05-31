@@ -185,9 +185,9 @@ void BAGSE_mixture::run(double thresh){
         char header[128];
         sprintf(header, "annot.%d", cat);
         printf("%15s   %10s   %7.3f    %7.3f %7.3f\n",header, category_rmap[cat].c_str(),alpha_vec[cat]-alpha_vec[0], ci_vec[0], ci_vec[1]);
-        fprintf(stderr, "\n\n");
     }
-
+    
+    fprintf(stderr, "\n\n");
 
 }
 
@@ -259,7 +259,7 @@ void BAGSE_mixture::fdr_control(char *fdr_out, double fdr_level){
     }
 
     fclose(fout);
-        
+
 
 }
 
