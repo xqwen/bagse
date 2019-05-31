@@ -10,7 +10,9 @@ Software distributed under the terms of the GNU General Public License as publis
 
 ## Types of gene set annotation
 
-When multiple gene set annotations are available, there are two possible ways to formulate gene set enrichment analysis involving multiple gene sets. When only a single gene set is used for analysis, both approaches apply but they yield slightly different results.
+When multiple gene set annotations are available, there are two possible ways to formulate gene set enrichment analysis involving multiple gene sets. 
+
+Note that when only a single gene set is used for analysis, both approaches are applicable but apply but the second approach is more restrictive (in requiring effect size distributions of the associated genes are the same for annotated and un-annotated genes. Therefore, we recommend the first approach for analyzing a single gene set annotation.  
 
 
 
@@ -28,7 +30,7 @@ For example ``0 1`` denotes a gene annotated in the second gene set but not in t
 More generally, this specific input format should be used if every gene is annotated by one of K mutually exclusive categories. The summary statistics and annotation of the genes should be contained in a single text file. 
 Importantly, we require that **the annotation for the baseline category is coded by 0**, other categories can be coded by arbitrary strings or integers.
 
-Under this formulation, BAGSE allows the effect size distribution under the alternative model (i.e., when gene-level association is geniune) is category-specific. 
+Under this formulation, BAGSE allows that the effect size distribution under the alternative model (i.e., when gene-level association is genuine) is category-specific. 
 
 Note, although this approach is the most general, it does not scale computationally for a large number of gene sets.  
 
@@ -63,7 +65,42 @@ bagse -d sample.combination_annotation.dat --load_zval
 ```
 
 
-### 2.Multiple gene set annotations assuming additivity
+### 2. Multiple gene set annotations assuming additivity
+
+An alternative approach is to assume that multiple gene set annotation is additively affecting the odds of a given gene being associated. This is a simplifying assumption in comparison to the previous approach, but has the advantage in computational efficiency, which allows to consider many gene sets simultaneously. 
+Additionally, this approach assumes a single distribution of effects under the alternative model regardless of types of annotations, which is more restrictive. 
+ 
+The input data for this approach are separated into two text files: one contains gene-level association statistics and the other contains gene set annotation information.  
+The summary statistics file has the following format:
+
+```
+gene-name  b-hat se(b-hat)
+```
+
+Z-scores are also accepted as input by using the command line option ``--load_zval`` and the following format:
+
+```
+gene-name z-score
+```
+
+The annotation file has the following format:
+
+```
+gene-name annotation1 annotation2 annotation3 ....
+```
+Importantly, a header starting with the keyword "Gene" is required:
+
+```
+Gene    set1-name set2-name set3-name ...
+```
+
+
+
+
+
+
+
+
 
 #### 2.1  Usage
 
@@ -71,7 +108,7 @@ bagse -d sample.combination_annotation.dat --load_zval
  bagse  -d summary_data -a annot_dat [--load_zval] [-fdr_level alpha]  [-fdr_out fdr_output_file]
 ```
 
-The presence of the annotation file ``annot_dat`` and the ``-a`` flag notify  BAGSE to switch to the algorithm using the additive prior. 
+**The presence of the annotation file** ``annot_dat`` **and the**``-a`` **flag notify  BAGSE to switch to the algorithm using the additive prior.** 
 
 
 #### 2.2 Sample data
