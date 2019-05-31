@@ -10,24 +10,39 @@ Software distributed under the terms of the GNU General Public License as publis
 
 ## Types of gene set annotation
 
-When multiple gene set annotations are available, there are two possible ways to formulate gene set enrichment analysis. 
+When multiple gene set annotations are available, there are two possible ways to formulate gene set enrichment analysis involving multiple gene sets. When only a single gene set is used for analysis, both approaches apply but they yield slightly different results.
+
+
 
 ### 1. Single mutually exclusive gene set annotation
 
-This specific input format should be used if every gene is annotated by one of K mutually exclusive categories. The summary statistics and annotation of the genes should be contained in a single text file. 
+In this approach, we define the combination of multiple gene set annotation as a new annotation. Consider two potentially overlapping gene set annotations, there are 4 possible combination of annotations depending on the presence and absence of a gene in each gene set, i.e.,
+
+```
+0 0  ---> 0
+1 0  ---> 1
+0 1  ---> 2
+1 1  ---> 3
+```
+For example ``0 1`` denotes a gene annotated in the second gene set but not in the first set, and we denote this combination as category ``3`` in the combined annotation. 
+More generally, this specific input format should be used if every gene is annotated by one of K mutually exclusive categories. The summary statistics and annotation of the genes should be contained in a single text file. 
 Importantly, we require that **the annotation for the baseline category is coded by 0**, other categories can be coded by arbitrary strings or integers.
 
+Under this formulation, BAGSE allows the effect size distribution under the alternative model (i.e., when gene-level association is geniune) is category-specific. 
 
-BAGSE prefers estimated association effect size (b-hat) and its corresponding standard error (sde) as the summary statistics for each gene. The information should be organized in a single text file with the following format
+Note, although this approach is the most general, it does not scale computationally for a large number of gene sets.  
+
+
+BAGSE prefers estimated association effect size (b-hat) and its corresponding standard error, se(b-hat), as the summary statistics for each gene. The information should be organized in a single text file with the following format
 
 ``` 
-gene-name  b-hat sde  annotation
+gene-name  b-hat se(b-hat)  annotation
 ```
 
 BAGSE also accepts gene-level z-scores as input. In such case, the expected format for the input text file is
 
 ```
-gene-name z-score annotation
+gene-name  z-score  annotation
 ```
 Use command option ``--load_zval`` to inform BAGSE that the z-score input is used. 
 
@@ -41,10 +56,10 @@ Use command option ``--load_zval`` to inform BAGSE that the z-score input is use
 
 #### 1.2 Sample data
 
-A set of sample data (``sample.bagse.dat``) can be found in the ``src`` folder. To estimate the enrichment parameter run
+A sample data set (``sample.combination_annotation.dat``) can be found in the ``sample_data`` folder. To estimate the enrichment parameter run
 
 ```
-bagse -d sample.bagse.dat --load_zval 
+bagse -d sample.combination_annotation.dat --load_zval 
 ```
 
 
@@ -56,15 +71,15 @@ bagse -d sample.bagse.dat --load_zval
  bagse  -d summary_data -a annot_dat [--load_zval] [-fdr_level alpha]  [-fdr_out fdr_output_file]
 ```
 
-The presence of the annotation file ``annot_dat`` notifies BAGSE to switch to the algorithm using the additive prior. 
+The presence of the annotation file ``annot_dat`` and the ``-a`` flag notify  BAGSE to switch to the algorithm using the additive prior. 
 
 
 #### 2.2 Sample data
 
-A set of sample data (``sample.dat`` and ``sample.annot.dat``) can be found in the ``src`` folder. To estimate the enrichment parameter run
+A set of sample data in this format (``sample.additive_summary.dat`` and ``sample.additive_annot.dat``) can be found in the ``sample_data`` folder. To estimate the enrichment parameter run
 
 ```
-bagse -d sample.dat -a  sample.annot.dat  --load_zval
+bagse -d sample.additive_summary.dat -a  sample.additive_annot.dat  --load_zval
 ```
 
 
