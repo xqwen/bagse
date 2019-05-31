@@ -20,11 +20,11 @@ In this approach, we define the combination of multiple gene set annotation as a
 
 ```
 0 0  ---> 0
-1 0  ---> 1
-0 1  ---> 2
+0 1  ---> 1
+1 0  ---> 2
 1 1  ---> 3
 ```
-For example ``0 1`` denotes a gene annotated in the second gene set but not in the first set, and we denote this combination as category ``3`` in the combined annotation. 
+For example ``0 1`` denotes a gene annotated in the second gene set but not in the first set, and we denote this combination as category ``1`` in the combined annotation. 
 More generally, this specific input format should be used if every gene is annotated by one of K mutually exclusive categories. The summary statistics and annotation of the genes should be contained in a single text file. 
 Importantly, we require that **the annotation for the baseline category is coded by 0**, other categories can be coded by arbitrary strings or integers.
 
