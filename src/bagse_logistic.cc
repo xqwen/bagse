@@ -168,8 +168,7 @@ void BAGSE_logistic::load_annotation(char *annot_file){
         else{
             col2cat[col_count] = 2;
             col2dpos[col_count] = kd; // position in Xd matrix
-            string name = token.substr(0,token.size()-2);
-            dvar_name_vec.push_back(name);
+            dvar_name_vec.push_back(token);
             kd++;
         }
 
