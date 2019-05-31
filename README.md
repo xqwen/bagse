@@ -48,6 +48,7 @@ gene-name  z-score  annotation
 ```
 Use command option ``--load_zval`` to inform BAGSE that the z-score input is used. 
 
+Additionally, p-values can be used in place of z-scores when the command line option ``--load_pval`` is specified.
 
 #### 1.1  Usage 
 
@@ -82,6 +83,9 @@ Z-scores are also accepted as input by using the command line option ``--load_zv
 ```
 gene-name z-score
 ```
+Additionally, p-values can be used in place of z-scores when the command line option ``--load_pval`` is specified.
+
+
 
 The annotation file has the following format:
 
