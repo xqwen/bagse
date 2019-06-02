@@ -182,7 +182,7 @@ void BAGSE_mixture::run(double thresh){
 
 
     vector<double> ci_vec = find_CI(est_vec, 0,alpha_vec[0],  0);
-    printf("%15s   %10s   %7.3f    %7.3f %7.3f\n", "Intercept", "0", alpha_vec[0], ci_vec[0], ci_vec[1]);
+    printf("%15s   %10s   %7.3f    %7.3f %7.3f\n", "Baseline", "0", alpha_vec[0], ci_vec[0], ci_vec[1]);
 
     for(int cat =1; cat <category_map.size(); cat++){
         ci_vec = find_CI(est_vec, cat, alpha_vec[cat]-alpha_vec[0],  alpha_vec[0]);

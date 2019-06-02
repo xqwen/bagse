@@ -12,7 +12,7 @@ Software distributed under the terms of the GNU General Public License as publis
 
 When multiple gene set annotations are available, there are two possible ways to formulate gene set enrichment analysis involving multiple gene sets. 
 
-Note that when only a single gene set is used for analysis, both approaches are applicable but apply but the second approach is more restrictive (in requiring effect size distributions of the associated genes are the same for annotated and un-annotated genes. Therefore, we recommend the first approach for analyzing a single gene set annotation.  
+Note that when only a single gene set is used for analysis, both approaches are applicable  but the second approach makes stronger assumption (in requiring the *same* effect size distributions of the associated genes for annotated and un-annotated genes). Thus, we recommend the first approach for analyzing a single gene set annotation.  
 
 
 
@@ -100,12 +100,6 @@ Gene    set1-name set2-name set3-name ...
 
 
 
-
-
-
-
-
-
 #### 2.1  Usage
 
 ```
@@ -130,7 +124,52 @@ bagse -d sample.additive_summary.dat -a  sample.additive_annot.dat  --load_zval
 
 ### Enrichment estimates
 
+Under the formulation of single mutually exclusive gene set annotation, the output of enrichment estimates from analyzing the sample data is given by 
+
+```
+       Baseline            0    -0.973     -1.075  -0.871
+        annot.1   category_1     0.841      0.724   0.958
+        annot.2   category_2     1.019      0.904   1.134
+        annot.3   category_3     2.261      2.106   2.416
+```
+
++ The first and second columns denote the names of the parameter and their corresponding annotations provided by the user. 
++ The third column shows the maximum likelihood estimates (MLEs) of the enrichment parameters. For baseline level, the estimate provides the log-odds ratio for category "0", which is served as the contrast for all other mutually exclusive categories. The estimates of the other categories are the estimated log-odds ratios *relative to* the baseline level, i.e., representing the relative enrichment in comparison to the baseline level. 
+For example, in the above example, the absolute log-odds ratio for ``category_1`` can be computed by -0.973 + 0.841 = -0.132.
++ The last two columns jointly represents the 95% confidence intervals for the estimated parameters.
+
+
+
+Under the formulation of multiple gene set annotations assuming additivity, the output is similar. The only difference is that the first two columns from the previous output are consolidated into one parameter column. The output from running the sample data is given by 
+
+```
+      Intercept   -1.065      -1.132  -0.997
+         set1.1    1.001       0.905   1.097
+         set2.1    1.207       1.112   1.301
+```
+
+
+
 ### FDR control results
+
+
+When the command line option ``-fdr_level alpha`` is specified, BAGSE perform FDR control to identify associated genes incorporating estimated enrichment information at ``alpha`` (e.g., 0.05) level.
+If an output file is *not* specified through ``-fdr_out`` option, a default ``fdr.out`` file will be created and used to record the FDR control results.
+
+The output of the FDR control has the following format:
+
+```
+          Gene1    4.787e-05   1
+          Gene2    8.006e-01   0
+          Gene3    7.301e-01   0
+          Gene4    7.514e-01   0
+          Gene5    3.472e-07   1
+
+```
+
++ Column 1: gene name
++ Column 2: local fdr or poterier false discovery probability
++ Column 3: rejection at the defined alpha level (1 means reject)
 
 
 
