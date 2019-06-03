@@ -168,7 +168,7 @@ The output of the FDR control has the following format:
 ```
 
 + Column 1: gene name
-+ Column 2: local fdr or poterier false discovery probability
++ Column 2: local fdr or posterior false discovery probability
 + Column 3: rejection at the defined alpha level (1 means reject)
 
 
