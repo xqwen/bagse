@@ -45,7 +45,14 @@ void BAGSE_logistic::load_data(char *filename, int use_zval, char *annot_file){
         else
             se_beta = 1;
 
-        if(use_zval == -1){
+        if(!use_zval)
+            ins>>se_beta;
+        else
+            se_beta = 1;
+
+        if(use_zval == -1) {// pvalue is used
+            if(beta<1e-16)
+                beta = 1e-16;
             beta = gsl_cdf_ugaussian_Qinv (beta/2);
         }
 
@@ -55,7 +62,7 @@ void BAGSE_logistic::load_data(char *filename, int use_zval, char *annot_file){
         se_vec.push_back(se_beta);
 
         
-        if(se_beta<min)
+        if(se_beta <= min)
             min = se_beta;
 
         if(beta*beta - se_beta*se_beta > max){

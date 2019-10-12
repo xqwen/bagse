@@ -47,9 +47,11 @@ void BAGSE_mixture::load_data(char *filename, int use_zval){
         else 
             se_beta = 1;
 
-        if(use_zval == -1) // pvalue is used
+        if(use_zval == -1) {// pvalue is used
+            if(beta<1e-16)
+                beta = 1e-16;
             beta = gsl_cdf_ugaussian_Qinv (beta/2);
-        
+        }
         if(!(ins>>annot)){
             fprintf(stderr, "\nError: unexpected data format in input\n\n");
             exit(1);
@@ -58,10 +60,10 @@ void BAGSE_mixture::load_data(char *filename, int use_zval){
         beta_vec.push_back(beta);
         se_vec.push_back(se_beta);
 
-        if(se_beta<min)
+        if(se_beta<=min)
             min = se_beta;
 
-        if(beta*beta - se_beta*se_beta > max){
+        if(beta*beta - se_beta*se_beta >= max){
             max = pow(beta,2)-pow(se_beta,2);
         }
 
@@ -76,16 +78,12 @@ void BAGSE_mixture::load_data(char *filename, int use_zval){
         annot_vec.push_back(category_map[annot]);
 
     }
-
     dfile.close();
-
-    // compute BF vector
     double phi_min = min/10;
     double phi_max = 2*sqrt(max);
     if(phi_max<phi_min){
         phi_max = 8*phi_min;
     }
-
     vector<double> grid_vec = make_grid(phi_min, phi_max);
     grid_size = grid_vec.size();
 
@@ -95,7 +93,6 @@ void BAGSE_mixture::load_data(char *filename, int use_zval){
     K = annot_size*(grid_size+1);
 
     N = beta_vec.size();
-
 
     fprintf(stderr, "Initializing ... \n");
     //fprintf(stderr, "N=%d\t K=%d\t L=%d\t  M=%d\n", N, grid_size, annot_size, K);
