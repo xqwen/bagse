@@ -345,7 +345,8 @@ void BAGSE_logistic::run(double thresh){
             loglik = gem.compute_loglik(alpha_test);
             gsl_vector_free(alpha_test);
             se = sqrt(pow(est,2)/(2*(final_loglik-loglik)));
-            printf("  %7.3f %7.3f\n", est-1.96*se, est+1.96*se);
+            double pval = 2*gsl_cdf_ugaussian_P(-fabs(est/se));
+            printf("  %7.3f %7.3f (pvalue: %7.3e)\n", est-1.96*se, est+1.96*se, pval);
             index++;
         }
     }
@@ -363,7 +364,8 @@ void BAGSE_logistic::run(double thresh){
         loglik = gem.compute_loglik(alpha_test);
         gsl_vector_free(alpha_test);
         se = sqrt(pow(est,2)/(2*(final_loglik-loglik)));
-        printf("  %7.3f %7.3f\n", est-1.96*se, est+1.96*se);
+        double pval = 2*gsl_cdf_ugaussian_P(-fabs(est/se));
+        printf("  %7.3f %7.3f (pvalue: %7.3e)\n", est-1.96*se, est+1.96*se, pval);
         index++;
     }
 

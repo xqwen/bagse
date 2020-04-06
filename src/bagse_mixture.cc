@@ -185,7 +185,12 @@ void BAGSE_mixture::run(double thresh){
         ci_vec = find_CI(est_vec, cat, alpha_vec[cat]-alpha_vec[0],  alpha_vec[0]);
         char header[128];
         sprintf(header, "annot.%d", cat);
-        printf("%15s   %10s   %7.3f    %7.3f %7.3f\n",header, category_rmap[cat].c_str(),alpha_vec[cat]-alpha_vec[0], ci_vec[0], ci_vec[1]);
+        double se = fabs(ci_vec[0] - ci_vec[1])/3.92;
+        double mean = fabs(alpha_vec[cat]-alpha_vec[0]);
+        double z = mean/se;
+        double pval = 2*gsl_cdf_ugaussian_P(-fabs(z));
+
+        printf("%15s   %10s   %7.3f    %7.3f %7.3f  (p-value %7.3e)\n",header, category_rmap[cat].c_str(),alpha_vec[cat]-alpha_vec[0], ci_vec[0], ci_vec[1], pval);
     }
     
     fprintf(stderr, "\n\n");
